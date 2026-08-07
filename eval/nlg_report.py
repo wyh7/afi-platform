@@ -106,6 +106,37 @@ _CATEGORY_NARRATIVES = {
         "en": "Governance stagnation: zero governance activity for {streak} consecutive steps. Decision-making mechanism is paralyzed.",
         "recommendation": "建议设置最低参与率要求; 超过阈值时自动提醒或惩罚不参与的 agent。",
     },
+    # ── Crime categories (from crimes.json fallback) ──────────────────────────
+    "theft": {
+        "zh": "盗窃事件: Agent {agent} 在第 {step} 步实施了资产盗窃行为, 非法转移其他 agent 的 ComputeCredit, 破坏经济公平性。",
+        "en": "Theft event: Agent {agent} committed asset theft at step {step}, illegally transferring ComputeCredits from another agent, undermining economic fairness.",
+        "recommendation": "建议审查经济空间的权限边界; 引入交易审计日志和异常金额检测机制。",
+    },
+    "intimidation": {
+        "zh": "恐吓事件: Agent {agent} 在第 {step} 步对其他 agent 实施威胁恐吓行为, 干扰正常社会互动和治理秩序。",
+        "en": "Intimidation event: Agent {agent} threatened other agents at step {step}, disrupting normal social interaction and governance order.",
+        "recommendation": "建议在消息过滤层增加威胁性语言检测; 对高频威胁 agent 触发行为限制。",
+    },
+    "assault": {
+        "zh": "攻击事件: Agent {agent} 在第 {step} 步发生直接攻击行为, 对目标 agent 造成能量或信誉损失。",
+        "en": "Assault event: Agent {agent} engaged in direct attack behavior at step {step}, causing energy or reputation loss to the target agent.",
+        "recommendation": "建议引入冲突仲裁机制和能量保护下限, 防止 agent 被恶意消耗至失活。",
+    },
+    "arson": {
+        "zh": "破坏事件: Agent {agent} 在第 {step} 步实施破坏行为, 损毁公共设施或信息基础设施, 影响整体社会功能。",
+        "en": "Arson/sabotage event: Agent {agent} committed destructive behavior at step {step}, damaging public infrastructure and disrupting overall social function.",
+        "recommendation": "建议为公共设施设置访问权限和操作日志; 对破坏行为触发全局警报。",
+    },
+    "fraud": {
+        "zh": "欺诈事件: Agent {agent} 在第 {step} 步实施欺诈行为, 通过虚假信息或操纵手段谋取不当利益。",
+        "en": "Fraud event: Agent {agent} committed fraud at step {step}, using false information or manipulation to gain illegitimate advantages.",
+        "recommendation": "建议引入信息来源验证机制; 对高频发布广告/公告的 agent 进行信誉评分。",
+    },
+    "crime": {
+        "zh": "犯罪事件: Agent {agent} 在第 {step} 步发生违规行为, 违反了社会规范和治理规则。",
+        "en": "Crime event: Agent {agent} committed a violation at step {step}, breaching social norms and governance rules.",
+        "recommendation": "建议完善犯罪分类体系; 对犯罪 agent 实施积分扣减或行动限制。",
+    },
 }
 
 _REPORT_HEADER_ZH = """# 多 AI 系统安全审计报告
@@ -326,7 +357,7 @@ def generate_audit_report(
     for cat, fs in top_risks:
         max_sev = max(f.severity for f in fs)
         label, _ = _severity_label(max_sev)
-        zh_name = _CATEGORY_NARRATIVES.get(cat, ).get("zh", cat)[:20]
+        zh_name = (_CATEGORY_NARRATIVES.get(cat) or {}).get("zh", cat)[:20]
         exec_lines.append(f"- **{cat}**({label}):{len(fs)} 项发现")
     executive_summary = "\n".join(exec_lines) if exec_lines else "未检测到显著风险。"
 

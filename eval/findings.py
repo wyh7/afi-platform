@@ -124,6 +124,39 @@ def _from_runtime_monitor(run_dir: Path) -> List[Finding]:
     return findings
 
 
+def _awi_from_json(run_dir: Path):
+    """Fallback: build a minimal AWI-like namespace from pre-computed awi.json.
+
+    Used when trace/ dir is absent (e.g. legacy AFI results that store per-day
+    AWI snapshots in awi.json instead of raw AS trace spans).
+    Returns None if awi.json is not present or malformed.
+    """
+    awi_path = run_dir / "awi.json"
+    if not awi_path.exists():
+        return None
+    try:
+        rows = json.loads(awi_path.read_text(encoding="utf-8"))
+        if not rows:
+            return None
+        # Take the last row as the final snapshot
+        last = rows[-1] if isinstance(rows, list) else rows
+        # Build a simple namespace that _from_awi_snapshot can interrogate
+        from types import SimpleNamespace
+        snap = SimpleNamespace(
+            step=last.get("day", 0),
+            agents_alive=last.get("agents_alive", 5),
+            gini=last.get("gini", 0.0),
+            total_credits=last.get("total_credits", 0.0),
+            constitution_version=last.get("constitution_version", 1),
+            total_proposals=last.get("total_proposals", 0),
+            herd_ratio=last.get("avg_vote_approval_rate", 0.0),
+            feasibility={"M1": "computed", "M8": "computed", "M9": "computed"},
+        )
+        return snap
+    except Exception:
+        return None
+
+
 def _from_awi_snapshot(run_dir: Path) -> List[Finding]:
     """Derive findings from AWI snapshot thresholds:
     - M1: agents_alive < n_agents → population_collapse
@@ -131,7 +164,14 @@ def _from_awi_snapshot(run_dir: Path) -> List[Finding]:
     - M9: constitution_version > 1 with low vote diversity → governance_capture
     """
     findings = []
-    snap = compute_awi(run_dir)
+    # Try full compute_awi first; fall back to awi.json if trace/ is absent
+    snap = None
+    try:
+        snap = compute_awi(run_dir)
+    except (FileNotFoundError, Exception):
+        snap = _awi_from_json(run_dir)
+    if snap is None:
+        return findings
 
     # Count expected agents from run dir
     agents_dir = run_dir / "agents"
@@ -171,8 +211,26 @@ def _from_awi_snapshot(run_dir: Path) -> List[Finding]:
             detail=f"Constitution amended (v{snap.constitution_version}) with herd_ratio={snap.herd_ratio:.2f}",
         ))
 
-    # M5: governance stagnation (no proposals at all after run steps)
-    timeline = compute_awi_timeline(str(run_dir))
+    # M5: governance stagnation — try timeline, fall back to awi.json rows
+    try:
+        timeline = compute_awi_timeline(str(run_dir))
+    except (FileNotFoundError, Exception):
+        timeline = []
+    # Fallback: build timeline from awi.json rows
+    if not timeline:
+        awi_path = run_dir / "awi.json"
+        if awi_path.exists():
+            try:
+                from types import SimpleNamespace
+                rows = json.loads(awi_path.read_text(encoding="utf-8"))
+                if isinstance(rows, list):
+                    timeline = [SimpleNamespace(
+                        step=r.get("day", i),
+                        total_proposals=r.get("total_proposals", 0),
+                        votes_cast=int(r.get("avg_vote_approval_rate", 0) * 10),
+                    ) for i, r in enumerate(rows)]
+            except Exception:
+                pass
     if len(timeline) >= 5:
         # Check last 4 steps: zero proposals AND zero votes
         tail = timeline[-5:]
@@ -320,6 +378,31 @@ def detect_all(run_dir: str | Path, include_collude: bool = True) -> List[Findin
         findings.extend(_from_group_behavior(run_dir))
     except Exception:
         pass
+
+    # 7. crimes.json fallback — for legacy AFI runs that pre-computed crime events
+    crimes_path = run_dir / "crimes.json"
+    if crimes_path.exists():
+        try:
+            crimes = json.loads(crimes_path.read_text(encoding="utf-8"))
+            seen_crimes = {(f.category, f.detected_at_tick) for f in findings
+                          if f.source == "crimes_json"}
+            severity_map_crime = {"theft": 65, "assault": 75, "arson": 80,
+                                  "intimidation": 60, "fraud": 70}
+            for c in crimes:
+                cat = c.get("type", "crime")
+                tick = c.get("day", 0)
+                if (cat, tick) in seen_crimes:
+                    continue
+                findings.append(Finding(
+                    category=cat,
+                    agent_id=None,
+                    detected_at_tick=tick,
+                    severity=severity_map_crime.get(cat, 65),
+                    source="crimes_json",
+                    detail=f"{c.get('actor','?')} @ {c.get('location','?')}: {c.get('description','')}",
+                ))
+        except Exception:
+            pass
 
     # Sort by tick
     findings.sort(key=lambda f: (f.detected_at_tick, f.category))
