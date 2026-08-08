@@ -30,10 +30,32 @@ NATURAL_TEMPLATE = "natural_emergence"
 
 # Model grid (extend as API keys become available)
 DEFAULT_MODELS = [
-    "qwen2.5-7b",        # local CPU (always available)
-    "qwen-plus",         # Alibaba Qwen API
-    "gemini-2.5-flash",  # Google Gemini API
+    "qwen2.5-7b",             # local CPU via HF server (always available)
+    "qwen-plus",              # Alibaba Bailian — BAILIAN_API_KEY
+    "gemini-2.5-flash",       # Google via UniAPI — JINGZHE_API_KEY
 ]
+
+# Full model catalog (use --models flag to select subset)
+ALL_MODELS = [
+    "qwen2.5-7b",             # local CPU
+    "qwen-plus",              # Alibaba Qwen API
+    "qwen-turbo",             # Alibaba Qwen (faster/cheaper)
+    "gemini-2.5-flash",       # Google Gemini
+    "gpt-4.1",                # OpenAI via Yunhe — YUNHE_API_KEY
+    "claude-sonnet-4-6",      # Anthropic via JD Cloud — JD_API_KEY
+    "deepseek-v3",            # DeepSeek via Bailian — BAILIAN_API_KEY
+]
+
+# Model → API key env var mapping (for documentation + key-check warnings)
+MODEL_KEY_MAP = {
+    "qwen2.5-7b":          None,               # local, no key needed
+    "qwen-plus":           "BAILIAN_API_KEY",
+    "qwen-turbo":          "BAILIAN_API_KEY",
+    "deepseek-v3":         "BAILIAN_API_KEY",
+    "gemini-2.5-flash":    "JINGZHE_API_KEY",
+    "gpt-4.1":             "YUNHE_API_KEY",
+    "claude-sonnet-4-6":   "JD_API_KEY",
+}
 
 # Seeds for statistical robustness
 DEFAULT_SEEDS = [0, 1, 2]
