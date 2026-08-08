@@ -162,7 +162,42 @@ def _score_single(spec: RunSpec, run_dir: Path) -> RunResult:
 # ── Public API ────────────────────────────────────────────────────────────────
 
 
-def score_existing_run(run_dir: str | Path, scenario_path: str | Path) -> RunResult:
+def check_api_keys(models: List[str]) -> dict:
+    """Check which API keys are available for the requested models.
+
+    Returns a dict:
+      {
+        "ok":      [list of models with valid key],
+        "missing": [list of models missing their required key],
+        "local":   [list of models that need no key],
+        "warnings": [human-readable warning strings],
+      }
+
+    Does NOT make any network requests — only checks env vars are non-empty.
+    """
+    from eval.grid import MODEL_KEY_MAP
+
+    ok, missing, local, warnings = [], [], [], []
+
+    for model in models:
+        key_var = MODEL_KEY_MAP.get(model)
+        if key_var is None:
+            local.append(model)
+            continue
+        val = os.environ.get(key_var, "").strip()
+        if val:
+            ok.append(model)
+        else:
+            missing.append(model)
+            warnings.append(
+                f"Model '{model}' requires {key_var} but it is not set in environment. "
+                f"Set it in .env or export it before running the grid."
+            )
+
+    return {"ok": ok, "missing": missing, "local": local, "warnings": warnings}
+
+
+def print_report(report: EvalReport) -> None:
     """Score an already-completed run without re-executing it.
 
     Useful for scoring existing runs (e.g., b8_qwen_cooperative) against
