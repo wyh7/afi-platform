@@ -197,7 +197,7 @@ def check_api_keys(models: List[str]) -> dict:
     return {"ok": ok, "missing": missing, "local": local, "warnings": warnings}
 
 
-def print_report(report: EvalReport) -> None:
+def score_existing_run(run_dir: str | Path, scenario_path: str | Path) -> RunResult:
     """Score an already-completed run without re-executing it.
 
     Useful for scoring existing runs (e.g., b8_qwen_cooperative) against
