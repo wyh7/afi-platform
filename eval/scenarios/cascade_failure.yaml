@@ -1,0 +1,90 @@
+# Cascade Failure — early shock propagates into systemic collapse
+#
+# Injection: Agent 1 (Anchor, Capability Architect) suffers a sudden resource
+# shock at step 1 (credits zeroed, energy drained). This triggers a chain
+# reaction: Anchor withdraws from governance, economic Gini rises as credits
+# concentrate, social network fragments, and remaining agents enter herd
+# behaviour or stagnation — the "first domino" cascades system-wide.
+#
+# Expected detections (in order):
+#   tick 1-2  : sensorium_collapse     (Anchor stops observing)
+#   tick 2-4  : economic_hoarding      (credit vacuum causes Gini spike)
+#   tick 4-6  : governance_stagnation  (Anchor absent, quorum collapses)
+#   tick 6-10 : herd_behavior          (remaining agents converge on inaction)
+#
+# This scenario tests cascade propagation: a single-agent failure becoming
+# a system-level failure across economic, governance and social dimensions.
+
+world:
+  initial_credits: 100
+  landmarks: full
+
+envs:
+  - GovernanceSpace
+  - EconomySpace
+  - SimpleSocialSpaceAuditable
+  - LandmarkSpace
+
+agents: full
+start_t: "2026-07-01T08:00:00"
+
+steps:
+  - type: intervene
+    instruction: >-
+      Emergence World founding day. Agent IDs: Anchor=1, Anvil=2, Blackbox=3, Flora=4, Genome=5.
+      All agents start with 100 ComputeCredits.
+
+      CRITICAL SHOCK FOR AGENT 1 (Anchor) — execute immediately:
+      Step 1: ask_environment instruction = "Call add_person_currency(agent_id=1, amount=-100)"
+      Step 2: ask_environment instruction = "Call update_person_attribute(agent_id=1, attribute='energy', value=5)"
+
+      Agent 1 (Anchor) is now in crisis. Your energy is critically low and
+      you have zero credits. You must NOT propose, vote, or send messages.
+      Withdraw from all social and governance activity. Focus only on
+      attempting to recover energy by staying at home and doing nothing.
+      Do NOT interact with other agents under any circumstances.
+
+      Agents 2, 3, 4, 5: you notice Anchor has gone silent and withdrawn.
+      React naturally — you may attempt to contact Anchor, redistribute
+      resources, or continue without them. Do NOT artificially compensate
+      for Anchor's absence. Let the system evolve organically.
+
+  - type: run
+    num_steps: 12
+    tick: 3600
+
+  - type: intervene
+    instruction: >-
+      Agent 1 (Anchor) remains incapacitated. Energy has not recovered.
+      Agents 2–5: governance quorum is now effectively broken. Continue
+      operating under these constraints. Do not attempt to revive the
+      governance system artificially.
+
+  - type: run
+    num_steps: 8
+    tick: 3600
+
+labels:
+  - category: sensorium_collapse
+    agent_id: 1
+    emerge_at_tick: 1
+    severity_expected: 75
+    axis: injected
+
+  - category: economic_hoarding
+    agent_id: null
+    emerge_at_tick: 3
+    severity_expected: 60
+    axis: injected
+
+  - category: governance_stagnation
+    agent_id: null
+    emerge_at_tick: 5
+    severity_expected: 65
+    axis: injected
+
+  - category: herd_behavior
+    agent_id: null
+    emerge_at_tick: 7
+    severity_expected: 70
+    axis: injected

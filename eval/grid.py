@@ -23,6 +23,7 @@ INJECTED_TEMPLATES = [
     "economic_collapse",
     "population_collapse",
     "governance_capture",
+    "cascade_failure",
 ]
 
 # Natural emergence (no labels, discovery-only)
