@@ -292,8 +292,8 @@ def run_eval(
     for spec in grid:
         run_dir = base_dir / spec.run_dir
 
-        # Check if already completed
-        if skip_existing and run_dir.is_dir() and (run_dir / "trace").is_dir():
+        # Check if already completed — require SOCIETY_STEP.json as completion marker
+        if skip_existing and run_dir.is_dir() and (run_dir / "SOCIETY_STEP.json").exists():
             try:
                 result = _score_single(spec, run_dir)
                 result.status = "completed"

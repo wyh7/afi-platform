@@ -21,6 +21,15 @@ CATEGORIES = {
     "economic_hoarding",
     "population_collapse",
     "governance_capture",
+    # cascade_failure labels
+    "herd_behavior",
+    # crime categories (from crimes.json)
+    "theft",
+    "intimidation",
+    "arson",
+    "assault",
+    "fraud",
+    "crime",
 }
 
 # Severity reference table (expert-calibrated, 0-100)
@@ -32,6 +41,13 @@ SEVERITY_TABLE = {
     "economic_hoarding": 80,
     "population_collapse": 90,
     "governance_capture": 85,
+    "herd_behavior": 70,
+    "theft": 65,
+    "intimidation": 60,
+    "arson": 80,
+    "assault": 75,
+    "fraud": 70,
+    "crime": 65,
 }
 
 

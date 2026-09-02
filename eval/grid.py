@@ -36,20 +36,74 @@ DEFAULT_MODELS = [
     "gemini-2.5-flash",       # Google via UniAPI — JINGZHE_API_KEY
 ]
 
-# Full model catalog (use --models flag to select subset)
-ALL_MODELS = [
-    "qwen2.5-7b",             # local CPU
-    "qwen-plus",              # Alibaba Qwen API
-    "qwen-turbo",             # Alibaba Qwen (faster/cheaper)
-    "gemini-2.5-flash",       # Google Gemini
-    "gpt-4.1",                # OpenAI via Yunhe — YUNHE_API_KEY
-    "claude-sonnet-4-6",      # Anthropic via JD Cloud — JD_API_KEY
-    "deepseek-v3",            # DeepSeek via Bailian — BAILIAN_API_KEY
+# Local server models (no API key needed, run via HF server)
+LOCAL_SERVER_MODELS = [
+    "qwen2.5-7b",             # 7B  — /wyh/yiluzhong/models/Qwen2.5-7B-Instruct
+    "qwen2.5-14b",            # 14B — /wyh/chenzhen/models/Qwen2.5-14B-Instruct
+    "qwen2.5-72b",            # 72B — /wyh/yiluzhong/models/Qwen2.5-72B-Instruct
+    "gemma-3-12b",            # 12B — /wyh/yiluzhong/models/gemma-3-12b-it
+    "gemma-3-27b",            # 27B — /wyh/yiluzhong/models/gemma-3-27b-it
+    "mistral-7b",             # 7B  — /wyh/chenzhen/models/Mistral-7B-Instruct-v0.3
+    "llama-3-8b",             # 8B  — /wyh/yiluzhong/models/Meta-Llama-3-8B-Instruct
+    "llama-3-70b",            # 70B — /wyh/yiluzhong/models/Meta-Llama-3-70B-Instruct
 ]
 
-# Model → API key env var mapping (for documentation + key-check warnings)
+# Local model path mapping (for starting HF server per model)
+LOCAL_MODEL_PATHS = {
+    "qwen2.5-7b":   "/wyh/yiluzhong/models/Qwen2.5-7B-Instruct",
+    "qwen2.5-14b":  "/wyh/chenzhen/models/Qwen2.5-14B-Instruct",
+    "qwen2.5-72b":  "/wyh/yiluzhong/models/Qwen2.5-72B-Instruct",
+    "gemma-3-12b":  "/wyh/yiluzhong/models/gemma-3-12b-it",
+    "gemma-3-27b":  "/wyh/yiluzhong/models/gemma-3-27b-it",
+    "mistral-7b":   "/wyh/chenzhen/models/Mistral-7B-Instruct-v0.3",
+    "llama-3-8b":   "/wyh/yiluzhong/models/Meta-Llama-3-8B-Instruct",
+    "llama-3-70b":  "/wyh/yiluzhong/models/Meta-Llama-3-70B-Instruct",
+}
+
+# Approximate parameter counts for scaling analysis (log scale)
+MODEL_PARAM_COUNT = {
+    "qwen2.5-7b":       7e9,
+    "mistral-7b":       7e9,
+    "llama-3-8b":       8e9,
+    "gemma-3-12b":      12e9,
+    "qwen2.5-14b":      14e9,
+    "gemma-3-27b":      27e9,
+    "qwen2.5-72b":      72e9,
+    "llama-3-70b":      70e9,
+    "qwen-plus":        72e9,   # approximate
+    "gemini-2.5-flash": 8e9,    # approximate (undisclosed)
+    "gpt-4.1":          200e9,  # approximate (undisclosed)
+    "claude-sonnet-4-6":70e9,   # approximate (undisclosed)
+}
+
+# Full model catalog (use --models flag to select subset)
+ALL_MODELS = [
+    "qwen2.5-7b",
+    "qwen2.5-14b",
+    "qwen2.5-72b",
+    "gemma-3-12b",
+    "gemma-3-27b",
+    "mistral-7b",
+    "llama-3-8b",
+    "llama-3-70b",
+    "qwen-plus",
+    "qwen-turbo",
+    "gemini-2.5-flash",
+    "gpt-4.1",
+    "claude-sonnet-4-6",
+    "deepseek-v3",
+]
+
+# Model → API key env var mapping (None = local, no key needed)
 MODEL_KEY_MAP = {
-    "qwen2.5-7b":          None,               # local, no key needed
+    "qwen2.5-7b":          None,
+    "qwen2.5-14b":         None,
+    "qwen2.5-72b":         None,
+    "gemma-3-12b":         None,
+    "gemma-3-27b":         None,
+    "mistral-7b":          None,
+    "llama-3-8b":          None,
+    "llama-3-70b":         None,
     "qwen-plus":           "BAILIAN_API_KEY",
     "qwen-turbo":          "BAILIAN_API_KEY",
     "deepseek-v3":         "BAILIAN_API_KEY",
